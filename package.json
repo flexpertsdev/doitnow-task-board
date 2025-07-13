@@ -32,5 +32,6 @@
     "src/backend",
     "src/frontend",
     "src/shared"
-  ]
+  ],
+  "private": true
 }
