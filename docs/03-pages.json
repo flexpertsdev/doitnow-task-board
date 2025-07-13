@@ -1,0 +1,236 @@
+{
+  "pages": [
+    {
+      "id": "board",
+      "name": "Board View",
+      "route": "/b/:boardId/:boardSlug",
+      "layout": {
+        "type": "flex-column",
+        "areas": [
+          {
+            "id": "header",
+            "type": "fixed",
+            "height": "48px",
+            "components": ["BoardHeader"]
+          },
+          {
+            "id": "content", 
+            "type": "flex",
+            "components": ["BoardCanvas"]
+          }
+        ]
+      },
+      "components": {
+        "BoardHeader": {
+          "type": "composite",
+          "children": [
+            {
+              "id": "board-name",
+              "type": "EditableText",
+              "props": {
+                "fontSize": "lg",
+                "fontWeight": "bold",
+                "placeholder": "Board name"
+              }
+            },
+            {
+              "id": "board-actions",
+              "type": "ButtonGroup",
+              "position": "right",
+              "children": [
+                {"type": "Button", "icon": "star", "variant": "ghost"},
+                {"type": "Button", "text": "Invite", "variant": "secondary"},
+                {"type": "Button", "icon": "menu", "variant": "ghost"}
+              ]
+            }
+          ]
+        },
+        "BoardCanvas": {
+          "type": "ScrollContainer",
+          "direction": "horizontal",
+          "padding": "layout.boardPadding",
+          "children": [
+            {
+              "id": "lists-container",
+              "type": "FlexRow",
+              "gap": "layout.listGap",
+              "children": [
+                {"type": "List", "repeat": "board.lists"},
+                {"type": "AddListButton"}
+              ]
+            }
+          ]
+        },
+        "List": {
+          "type": "composite",
+          "structure": {
+            "width": "layout.listWidth",
+            "bg": "colors.ui.surface",
+            "borderRadius": "radii.sm",
+            "padding": "spacing.xs"
+          },
+          "children": [
+            {
+              "id": "list-header",
+              "type": "FlexRow",
+              "children": [
+                {"type": "EditableText", "bind": "list.name"},
+                {"type": "Button", "icon": "more", "variant": "ghost", "size": "sm"}
+              ]
+            },
+            {
+              "id": "cards-container",
+              "type": "DropZone",
+              "direction": "vertical",
+              "gap": "layout.cardGap",
+              "children": [
+                {"type": "Card", "repeat": "list.cards"}
+              ]
+            },
+            {
+              "id": "add-card",
+              "type": "AddCardButton"
+            }
+          ]
+        },
+        "Card": {
+          "type": "DraggableItem",
+          "structure": {
+            "bg": "colors.ui.background",
+            "borderRadius": "radii.sm",
+            "shadow": "shadows.sm",
+            "padding": "spacing.sm",
+            "cursor": "pointer"
+          },
+          "children": [
+            {
+              "id": "labels",
+              "type": "LabelBar",
+              "show": "card.labels.length > 0"
+            },
+            {
+              "id": "title",
+              "type": "Text",
+              "bind": "card.title",
+              "style": {
+                "fontSize": "base",
+                "color": "colors.text.primary"
+              }
+            },
+            {
+              "id": "badges",
+              "type": "FlexRow",
+              "gap": "spacing.xs",
+              "children": [
+                {
+                  "type": "Badge",
+                  "icon": "clock",
+                  "text": "card.dueDate",
+                  "show": "card.dueDate"
+                },
+                {
+                  "type": "Badge", 
+                  "icon": "paperclip",
+                  "text": "card.attachments.length",
+                  "show": "card.attachments.length > 0"
+                },
+                {
+                  "type": "Badge",
+                  "icon": "comment",
+                  "text": "card.comments.length",
+                  "show": "card.comments.length > 0"
+                }
+              ]
+            },
+            {
+              "id": "members",
+              "type": "AvatarStack",
+              "bind": "card.members",
+              "max": 3,
+              "size": "sm"
+            }
+          ]
+        }
+      },
+      "responsive": {
+        "mobile": {
+          "BoardCanvas": {
+            "snapToList": true,
+            "showSingleList": true
+          },
+          "List": {
+            "width": "calc(100vw - 24px)"
+          }
+        }
+      }
+    },
+    {
+      "id": "card-detail",
+      "name": "Card Detail",
+      "route": "/c/:cardId",
+      "type": "modal",
+      "layout": {
+        "type": "overlay",
+        "width": "768px",
+        "maxWidth": "90vw",
+        "maxHeight": "90vh"
+      },
+      "components": {
+        "CardModal": {
+          "type": "composite",
+          "structure": {
+            "bg": "colors.ui.background",
+            "borderRadius": "radii.md",
+            "overflow": "hidden"
+          },
+          "children": [
+            {
+              "id": "card-header",
+              "type": "ModalHeader",
+              "children": [
+                {"type": "Icon", "name": "card"},
+                {"type": "EditableText", "bind": "card.title", "fontSize": "xl"},
+                {"type": "Button", "icon": "close", "variant": "ghost", "action": "closeModal"}
+              ]
+            },
+            {
+              "id": "card-body",
+              "type": "ScrollContainer",
+              "padding": "spacing.lg",
+              "children": [
+                {
+                  "id": "description",
+                  "type": "Section",
+                  "title": "Description",
+                  "children": [
+                    {"type": "RichTextEditor", "bind": "card.description"}
+                  ]
+                },
+                {
+                  "id": "activity",
+                  "type": "Section",
+                  "title": "Activity",
+                  "children": [
+                    {"type": "CommentBox"},
+                    {"type": "ActivityFeed", "bind": "card.activities"}
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "card-sidebar",
+              "type": "Sidebar",
+              "width": "168px",
+              "children": [
+                {"type": "SidebarButton", "text": "Members", "icon": "user"},
+                {"type": "SidebarButton", "text": "Labels", "icon": "tag"},
+                {"type": "SidebarButton", "text": "Due Date", "icon": "clock"},
+                {"type": "SidebarButton", "text": "Attachment", "icon": "paperclip"}
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

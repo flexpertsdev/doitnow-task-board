@@ -1,0 +1,31 @@
+[build]
+  # Directory with the frontend code
+  base = "src/frontend"
+  
+  # Build command
+  command = "npm run build"
+  
+  # Directory that contains the deploy-ready files
+  publish = ".next"
+
+[build.environment]
+  # Node version
+  NODE_VERSION = "20"
+
+# Redirects for Next.js
+[[redirects]]
+  from = "/_next/static/*"
+  to = "/static/:splat"
+  status = 200
+
+# API proxy to backend (for local development)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Environment variables (these will be set in Netlify UI)
+[context.production.environment]
+  NEXT_PUBLIC_SUPABASE_URL = "https://rzlanxrbxegsrasjspmw.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6bGFueHJieGVnc3Jhc2pzcG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MjI1NzQsImV4cCI6MjA2Nzk5ODU3NH0.LWvd6C8OSc7fcqTYK8ZL2WlCHeBEQeNniqzw-n0fnxQ"
+  NEXT_PUBLIC_WS_URL = "wss://your-backend-url.com"

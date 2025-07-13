@@ -1,0 +1,200 @@
+{
+  "features": [
+    {
+      "id": "drag-drop",
+      "name": "Drag and Drop",
+      "type": "interaction",
+      "config": {
+        "draggableTypes": ["card", "list"],
+        "dropZoneTypes": ["list", "board"]
+      },
+      "handlers": {
+        "onDragStart": {
+          "action": "SET_DRAGGING_ITEM",
+          "visual": {
+            "opacity": 0.8,
+            "cursor": "grabbing",
+            "createPlaceholder": true
+          }
+        },
+        "onDragOver": {
+          "action": "SHOW_DROP_INDICATOR",
+          "visual": {
+            "background": "colors.states.hover",
+            "insertLine": {
+              "color": "colors.brand.primary",
+              "thickness": "2px"
+            }
+          }
+        },
+        "onDrop": {
+          "action": "MOVE_ITEM",
+          "params": ["sourceId", "targetId", "position"],
+          "optimistic": true,
+          "api": {
+            "endpoint": "/api/cards/:cardId/move",
+            "method": "PUT",
+            "body": {
+              "listId": "targetId",
+              "position": "position"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "real-time-sync",
+      "name": "Real-time Synchronization",
+      "type": "system",
+      "config": {
+        "transport": "websocket",
+        "fallback": "polling",
+        "reconnectDelay": [1000, 2000, 5000, 10000]
+      },
+      "channels": [
+        {
+          "name": "board",
+          "subscribe": "board/:boardId",
+          "events": [
+            "card.created",
+            "card.updated", 
+            "card.moved",
+            "card.deleted",
+            "list.created",
+            "list.updated",
+            "list.moved",
+            "member.joined",
+            "member.left"
+          ]
+        }
+      ],
+      "handlers": {
+        "onMessage": {
+          "action": "APPLY_REMOTE_CHANGE",
+          "conflictResolution": "last-write-wins"
+        },
+        "onDisconnect": {
+          "action": "SHOW_OFFLINE_BANNER",
+          "queueChanges": true
+        },
+        "onReconnect": {
+          "action": "SYNC_PENDING_CHANGES"
+        }
+      }
+    },
+    {
+      "id": "inline-editing",
+      "name": "Inline Editing",
+      "type": "interaction",
+      "components": ["EditableText", "EditableRichText"],
+      "config": {
+        "triggerOn": ["click", "focus"],
+        "confirmOn": ["blur", "enter"],
+        "cancelOn": ["escape"]
+      },
+      "handlers": {
+        "onEdit": {
+          "action": "ENABLE_EDIT_MODE",
+          "visual": {
+            "border": "2px solid colors.states.focus",
+            "background": "colors.ui.background"
+          }
+        },
+        "onConfirm": {
+          "action": "SAVE_EDIT",
+          "validation": {
+            "required": true,
+            "maxLength": 512
+          },
+          "api": {
+            "endpoint": "/api/:resourceType/:resourceId",
+            "method": "PATCH",
+            "debounce": 500
+          }
+        }
+      }
+    },
+    {
+      "id": "quick-add",
+      "name": "Quick Add",
+      "type": "interaction", 
+      "components": ["AddCardButton", "AddListButton"],
+      "config": {
+        "showFormInline": true,
+        "focusOnOpen": true
+      },
+      "handlers": {
+        "onOpen": {
+          "action": "SHOW_QUICK_ADD_FORM",
+          "visual": {
+            "replaceButton": true,
+            "showTextarea": true
+          }
+        },
+        "onSubmit": {
+          "action": "CREATE_ITEM",
+          "clearAfter": true,
+          "keepFormOpen": true,
+          "api": {
+            "endpoint": "/api/:parentType/:parentId/:itemType",
+            "method": "POST"
+          }
+        }
+      }
+    },
+    {
+      "id": "search",
+      "name": "Global Search",
+      "type": "system",
+      "trigger": {
+        "shortcut": "cmd+k",
+        "component": "SearchButton"
+      },
+      "config": {
+        "debounce": 300,
+        "minChars": 2,
+        "maxResults": 50
+      },
+      "searchScopes": [
+        {
+          "type": "card",
+          "fields": ["title", "description"],
+          "boost": {"title": 2}
+        },
+        {
+          "type": "board",
+          "fields": ["name"],
+          "boost": {"name": 1.5}
+        },
+        {
+          "type": "member",
+          "fields": ["name", "email"]
+        }
+      ]
+    },
+    {
+      "id": "notifications",
+      "name": "Notifications",
+      "type": "system",
+      "channels": ["in-app", "email", "push"],
+      "triggers": [
+        {
+          "event": "card.assigned",
+          "template": "{actor} assigned you to {card}",
+          "channels": ["in-app", "push"]
+        },
+        {
+          "event": "card.comment",
+          "template": "{actor} commented on {card}",
+          "channels": ["in-app", "email"]
+        },
+        {
+          "event": "card.due_soon",
+          "template": "{card} is due {time}",
+          "channels": ["push"],
+          "schedule": "1h before due"
+        }
+      ]
+    }
+  ]
+}

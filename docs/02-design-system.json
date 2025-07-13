@@ -1,0 +1,192 @@
+{
+  "tokens": {
+    "colors": {
+      "brand": {
+        "primary": "#0079BF",
+        "secondary": "#026AA7",
+        "accent": "#61BD4F"
+      },
+      "ui": {
+        "background": "#FFFFFF",
+        "surface": "#F4F5F7", 
+        "border": "#091E4221",
+        "overlay": "rgba(0,0,0,0.64)"
+      },
+      "text": {
+        "primary": "#172B4D",
+        "secondary": "#5E6C84",
+        "disabled": "#A5ADBA",
+        "inverse": "#FFFFFF"
+      },
+      "states": {
+        "hover": "rgba(9,30,66,0.08)",
+        "pressed": "rgba(9,30,66,0.16)",
+        "focus": "#0079BF",
+        "error": "#EB5A46",
+        "success": "#61BD4F"
+      }
+    },
+    "typography": {
+      "fontFamily": {
+        "base": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        "mono": "Monaco, Consolas, 'Courier New', monospace"
+      },
+      "scale": {
+        "xs": "12px",
+        "sm": "14px",
+        "base": "16px",
+        "lg": "20px",
+        "xl": "24px",
+        "xxl": "32px"
+      },
+      "weight": {
+        "regular": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700
+      },
+      "lineHeight": {
+        "tight": 1.2,
+        "base": 1.5,
+        "relaxed": 1.8
+      }
+    },
+    "spacing": {
+      "unit": 8,
+      "scale": {
+        "xxs": "4px",
+        "xs": "8px", 
+        "sm": "12px",
+        "md": "16px",
+        "lg": "24px",
+        "xl": "32px",
+        "xxl": "48px"
+      }
+    },
+    "layout": {
+      "boardPadding": "12px",
+      "listWidth": "272px",
+      "listGap": "8px",
+      "cardGap": "8px",
+      "maxBoardWidth": "100vw"
+    },
+    "animation": {
+      "duration": {
+        "fast": "100ms",
+        "base": "200ms",
+        "slow": "300ms"
+      },
+      "easing": {
+        "default": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "bounce": "cubic-bezier(0.68, -0.55, 0.265, 1.55)"
+      }
+    },
+    "shadows": {
+      "sm": "0 1px 0 rgba(9,30,66,0.25)",
+      "md": "0 4px 8px -2px rgba(9,30,66,0.25)",
+      "lg": "0 8px 16px -4px rgba(9,30,66,0.25)",
+      "overlay": "0 0 0 1px rgba(9,30,66,0.13)"
+    },
+    "radii": {
+      "sm": "3px",
+      "md": "6px",
+      "lg": "8px",
+      "full": "50%"
+    }
+  },
+  "components": {
+    "Button": {
+      "variants": {
+        "primary": {
+          "bg": "colors.brand.primary",
+          "color": "colors.text.inverse",
+          "hover": "colors.brand.secondary"
+        },
+        "secondary": {
+          "bg": "colors.ui.surface",
+          "color": "colors.text.primary",
+          "hover": "colors.states.hover"
+        },
+        "ghost": {
+          "bg": "transparent",
+          "color": "colors.text.secondary",
+          "hover": "colors.states.hover"
+        }
+      },
+      "sizes": {
+        "sm": {
+          "height": "32px",
+          "padding": "spacing.xs spacing.sm",
+          "fontSize": "typography.scale.sm"
+        },
+        "md": {
+          "height": "40px",
+          "padding": "spacing.sm spacing.md",
+          "fontSize": "typography.scale.base"
+        }
+      }
+    },
+    "Card": {
+      "base": {
+        "bg": "colors.ui.background",
+        "borderRadius": "radii.sm",
+        "shadow": "shadows.sm",
+        "padding": "spacing.xs spacing.sm",
+        "transition": "animation.duration.fast"
+      },
+      "hover": {
+        "shadow": "shadows.md",
+        "transform": "translateY(-2px)"
+      },
+      "dragging": {
+        "opacity": 0.8,
+        "rotate": "3deg",
+        "cursor": "grabbing"
+      }
+    },
+    "List": {
+      "base": {
+        "bg": "colors.ui.surface",
+        "borderRadius": "radii.sm",
+        "width": "layout.listWidth",
+        "padding": "spacing.xs"
+      },
+      "header": {
+        "padding": "spacing.xs spacing.sm",
+        "fontSize": "typography.scale.base",
+        "fontWeight": "typography.weight.semibold"
+      }
+    },
+    "Input": {
+      "base": {
+        "height": "36px",
+        "padding": "spacing.xs spacing.sm",
+        "borderRadius": "radii.sm",
+        "border": "2px solid colors.ui.border",
+        "fontSize": "typography.scale.base"
+      },
+      "focus": {
+        "borderColor": "colors.states.focus",
+        "outline": "none"
+      }
+    }
+  },
+  "patterns": {
+    "dragDropFeedback": {
+      "dragPreview": {
+        "opacity": 0.9,
+        "shadow": "shadows.lg"
+      },
+      "dropZone": {
+        "background": "colors.states.hover",
+        "borderRadius": "radii.sm",
+        "minHeight": "40px"
+      }
+    },
+    "responsiveBreakpoints": {
+      "mobile": "max-width: 768px",
+      "tablet": "min-width: 769px and max-width: 1024px", 
+      "desktop": "min-width: 1025px"
+    }
+  }
+}

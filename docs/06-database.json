@@ -1,0 +1,253 @@
+{
+  "schema": {
+    "entities": {
+      "User": {
+        "id": "uuid",
+        "email": "string:unique",
+        "name": "string",
+        "avatar_url": "string:nullable",
+        "created_at": "timestamp",
+        "updated_at": "timestamp",
+        "indexes": ["email"],
+        "relations": {
+          "boards": {
+            "type": "many-to-many",
+            "through": "BoardMember"
+          },
+          "cards": {
+            "type": "many-to-many",
+            "through": "CardMember"
+          }
+        }
+      },
+      "Board": {
+        "id": "uuid",
+        "name": "string",
+        "slug": "string:unique",
+        "background": "json:nullable",
+        "visibility": "enum:private,team,public",
+        "created_by": "uuid:User",
+        "team_id": "uuid:Team:nullable",
+        "created_at": "timestamp",
+        "updated_at": "timestamp",
+        "archived_at": "timestamp:nullable",
+        "indexes": ["slug", "team_id", "created_by"],
+        "relations": {
+          "lists": {
+            "type": "one-to-many",
+            "orderBy": "position"
+          },
+          "members": {
+            "type": "many-to-many",
+            "through": "BoardMember"
+          }
+        }
+      },
+      "List": {
+        "id": "uuid",
+        "board_id": "uuid:Board",
+        "name": "string",
+        "position": "float",
+        "created_at": "timestamp",
+        "updated_at": "timestamp",
+        "archived_at": "timestamp:nullable",
+        "indexes": ["board_id", "position"],
+        "relations": {
+          "cards": {
+            "type": "one-to-many",
+            "orderBy": "position"
+          }
+        }
+      },
+      "Card": {
+        "id": "uuid",
+        "list_id": "uuid:List",
+        "title": "string",
+        "description": "text:nullable",
+        "position": "float",
+        "due_date": "timestamp:nullable",
+        "created_by": "uuid:User",
+        "created_at": "timestamp",
+        "updated_at": "timestamp",
+        "archived_at": "timestamp:nullable",
+        "indexes": ["list_id", "position", "due_date"],
+        "relations": {
+          "members": {
+            "type": "many-to-many",
+            "through": "CardMember"
+          },
+          "labels": {
+            "type": "many-to-many",
+            "through": "CardLabel"
+          },
+          "comments": {
+            "type": "one-to-many",
+            "orderBy": "created_at DESC"
+          },
+          "attachments": {
+            "type": "one-to-many"
+          },
+          "activities": {
+            "type": "one-to-many",
+            "orderBy": "created_at DESC"
+          }
+        }
+      },
+      "Activity": {
+        "id": "uuid",
+        "type": "enum:card.created,card.moved,card.updated,comment.added",
+        "user_id": "uuid:User",
+        "board_id": "uuid:Board",
+        "card_id": "uuid:Card:nullable",
+        "data": "json",
+        "created_at": "timestamp",
+        "indexes": ["board_id", "card_id", "created_at"]
+      }
+    },
+    "junction_tables": {
+      "BoardMember": {
+        "board_id": "uuid:Board",
+        "user_id": "uuid:User",
+        "role": "enum:viewer,member,admin",
+        "joined_at": "timestamp",
+        "primary_key": ["board_id", "user_id"]
+      },
+      "CardMember": {
+        "card_id": "uuid:Card",
+        "user_id": "uuid:User",
+        "assigned_at": "timestamp",
+        "assigned_by": "uuid:User",
+        "primary_key": ["card_id", "user_id"]
+      }
+    }
+  },
+  "queries": {
+    "getBoardWithLists": {
+      "operation": "SELECT",
+      "optimized": true,
+      "sql": "SELECT b.*, json_agg(json_build_object('id', l.id, 'name', l.name, 'position', l.position, 'cards', l.cards) ORDER BY l.position) as lists FROM boards b LEFT JOIN LATERAL (SELECT l.*, json_agg(json_build_object('id', c.id, 'title', c.title, 'position', c.position, 'labels', c.labels, 'members', c.members, 'badges', json_build_object('due_date', c.due_date, 'comments', c.comment_count, 'attachments', c.attachment_count)) ORDER BY c.position) as cards FROM lists l LEFT JOIN cards_with_counts c ON c.list_id = l.id WHERE l.board_id = b.id AND l.archived_at IS NULL GROUP BY l.id) l ON true WHERE b.id = $1 AND b.archived_at IS NULL GROUP BY b.id",
+      "cache": {
+        "key": "board:{boardId}:full",
+        "ttl": 5
+      }
+    },
+    "moveCard": {
+      "operation": "UPDATE",
+      "transaction": true,
+      "steps": [
+        {
+          "name": "update_position",
+          "sql": "UPDATE cards SET list_id = $2, position = $3, updated_at = NOW() WHERE id = $1"
+        },
+        {
+          "name": "log_activity",
+          "sql": "INSERT INTO activities (type, user_id, board_id, card_id, data) VALUES ('card.moved', $4, $5, $1, $6)"
+        }
+      ],
+      "broadcast": {
+        "channel": "board:{boardId}",
+        "event": "card.moved",
+        "data": {
+          "cardId": "$1",
+          "fromListId": "$oldListId",
+          "toListId": "$2",
+          "position": "$3"
+        }
+      }
+    }
+  },
+  "migrations": {
+    "versioning": "timestamp",
+    "files": [
+      {
+        "version": "20240101_initial",
+        "up": "CREATE EXTENSION IF NOT EXISTS 'uuid-ossp'...",
+        "down": "DROP SCHEMA public CASCADE..."
+      }
+    ]
+  },
+  "integrations": {
+    "auth": {
+      "provider": "supabase",
+      "config": {
+        "providers": ["email", "google", "github"],
+        "redirect_url": "${APP_URL}/auth/callback",
+        "jwt_secret": "${JWT_SECRET}"
+      }
+    },
+    "storage": {
+      "provider": "supabase",
+      "buckets": {
+        "avatars": {
+          "public": true,
+          "maxSize": "5MB",
+          "allowedTypes": ["image/*"]
+        },
+        "attachments": {
+          "public": false,
+          "maxSize": "10MB",
+          "policies": {
+            "read": "board_member",
+            "write": "card_member"
+          }
+        }
+      }
+    },
+    "realtime": {
+      "provider": "supabase",
+      "channels": {
+        "board": {
+          "schema": "public",
+          "table": "activities",
+          "filter": "board_id=eq.{boardId}"
+        }
+      }
+    },
+    "search": {
+      "provider": "typesense",
+      "collections": {
+        "cards": {
+          "fields": [
+            {"name": "title", "type": "string"},
+            {"name": "description", "type": "string", "optional": true},
+            {"name": "board_id", "type": "string", "facet": true}
+          ],
+          "default_sorting_field": "updated_at"
+        }
+      }
+    }
+  },
+  "api": {
+    "rest": {
+      "baseUrl": "/api/v1",
+      "auth": "bearer",
+      "rateLimit": {
+        "window": "1m",
+        "max": 100
+      },
+      "endpoints": {
+        "boards": {
+          "list": "GET /boards",
+          "get": "GET /boards/:id",
+          "create": "POST /boards",
+          "update": "PATCH /boards/:id",
+          "delete": "DELETE /boards/:id"
+        },
+        "cards": {
+          "create": "POST /lists/:listId/cards",
+          "update": "PATCH /cards/:id",
+          "move": "PUT /cards/:id/move",
+          "delete": "DELETE /cards/:id"
+        }
+      }
+    },
+    "graphql": {
+      "enabled": false
+    },
+    "websocket": {
+      "endpoint": "/ws",
+      "protocol": "wss",
+      "heartbeat": 30
+    }
+  }
+}

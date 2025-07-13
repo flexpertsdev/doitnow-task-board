@@ -1,0 +1,221 @@
+{
+  "journeys": [
+    {
+      "id": "create-first-board",
+      "name": "New User Creates First Board",
+      "persona": "first-time-user",
+      "goal": "Successfully create and understand a board",
+      "steps": [
+        {
+          "step": 1,
+          "page": "home",
+          "action": "CLICK_CREATE_BOARD",
+          "state": {
+            "boards": [],
+            "showWelcome": true
+          },
+          "ui": {
+            "highlight": "CreateBoardButton",
+            "tooltip": "Create your first board"
+          }
+        },
+        {
+          "step": 2,
+          "page": "board-create-modal",
+          "action": "ENTER_BOARD_NAME",
+          "validation": {
+            "required": true,
+            "suggestion": "My First Project"
+          }
+        },
+        {
+          "step": 3,
+          "page": "board",
+          "state": {
+            "board": {
+              "lists": [
+                {"name": "To Do", "cards": []},
+                {"name": "In Progress", "cards": []},
+                {"name": "Done", "cards": []}
+              ]
+            }
+          },
+          "tutorial": {
+            "show": true,
+            "steps": [
+              "Click on any list name to rename it",
+              "Click 'Add a card' to create your first task",
+              "Drag cards between lists to update their status"
+            ]
+          }
+        }
+      ],
+      "success_metrics": {
+        "time_to_complete": "< 2 minutes",
+        "actions_required": 3,
+        "errors_allowed": 0
+      }
+    },
+    {
+      "id": "collaborate-on-card",
+      "name": "Team Member Updates Card",
+      "persona": "team-member",
+      "goal": "Add context to an assigned card",
+      "steps": [
+        {
+          "step": 1,
+          "page": "board",
+          "trigger": "NOTIFICATION_RECEIVED",
+          "action": "CLICK_NOTIFICATION",
+          "state": {
+            "notification": {
+              "type": "card.assigned",
+              "card": "Design Homepage Mockup"
+            }
+          }
+        },
+        {
+          "step": 2,
+          "page": "board",
+          "action": "CLICK_CARD",
+          "transition": {
+            "scrollTo": "card",
+            "highlight": "card",
+            "duration": 300
+          }
+        },
+        {
+          "step": 3,
+          "page": "card-detail",
+          "action": "ADD_COMMENT",
+          "features": ["inline-editing", "real-time-sync"],
+          "state": {
+            "focusOn": "CommentBox"
+          }
+        },
+        {
+          "step": 4,
+          "page": "card-detail",
+          "action": "ATTACH_FILE",
+          "features": ["file-upload"],
+          "validation": {
+            "maxSize": "10MB",
+            "allowedTypes": ["image/*", "application/pdf"]
+          }
+        },
+        {
+          "step": 5,
+          "page": "card-detail",
+          "action": "UPDATE_STATUS",
+          "method": "DRAG_TO_NEW_LIST",
+          "broadcast": {
+            "event": "card.moved",
+            "to": ["board.members"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "mobile-quick-update",
+      "name": "Mobile Quick Status Update",
+      "persona": "mobile-user",
+      "platform": "mobile-pwa",
+      "goal": "Update card status on the go",
+      "steps": [
+        {
+          "step": 1,
+          "page": "board",
+          "action": "SWIPE_TO_LIST",
+          "gesture": {
+            "type": "swipe",
+            "direction": "horizontal",
+            "threshold": 50
+          }
+        },
+        {
+          "step": 2,
+          "page": "board",
+          "action": "LONG_PRESS_CARD",
+          "gesture": {
+            "type": "long-press",
+            "duration": 500
+          },
+          "ui": {
+            "show": "QuickActionsMenu"
+          }
+        },
+        {
+          "step": 3,
+          "page": "board",
+          "action": "SELECT_MOVE_TO_LIST",
+          "ui": {
+            "show": "ListPicker",
+            "position": "bottom-sheet"
+          }
+        }
+      ],
+      "offline_support": {
+        "queue_changes": true,
+        "show_sync_indicator": true
+      }
+    },
+    {
+      "id": "power-user-bulk-ops",
+      "name": "Power User Bulk Operations",
+      "persona": "power-user",
+      "goal": "Efficiently manage multiple cards",
+      "shortcuts": [
+        {"key": "cmd+a", "action": "SELECT_ALL_CARDS"},
+        {"key": "cmd+click", "action": "MULTI_SELECT"},
+        {"key": "d", "action": "OPEN_DUE_DATE_PICKER"},
+        {"key": "l", "action": "OPEN_LABEL_PICKER"}
+      ],
+      "steps": [
+        {
+          "step": 1,
+          "action": "ENABLE_MULTI_SELECT",
+          "trigger": "cmd+click",
+          "ui": {
+            "show": "SelectionToolbar",
+            "position": "bottom"
+          }
+        },
+        {
+          "step": 2,
+          "action": "SELECT_MULTIPLE_CARDS",
+          "visual": {
+            "border": "2px solid colors.brand.primary",
+            "showCheckbox": true
+          }
+        },
+        {
+          "step": 3,
+          "action": "BULK_ACTION",
+          "options": [
+            "Move all to list",
+            "Add label to all",
+            "Archive all",
+            "Add member to all"
+          ]
+        }
+      ]
+    }
+  ],
+  "journey_connections": {
+    "onboarding_flow": [
+      "create-first-board",
+      "invite-team-member",
+      "create-first-card"
+    ],
+    "daily_workflow": [
+      "morning-board-review",
+      "collaborate-on-card",
+      "mobile-quick-update"
+    ],
+    "advanced_features": [
+      "power-user-bulk-ops",
+      "automation-setup",
+      "integration-config"
+    ]
+  }
+}
