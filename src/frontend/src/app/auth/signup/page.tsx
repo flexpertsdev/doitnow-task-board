@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useSupabase } from '@/app/providers';
 import { Button } from '@/components/base/Button';
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const router = useRouter();
   const supabase = useSupabase();
   const [email, setEmail] = useState('');
@@ -20,7 +20,7 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
       });
@@ -29,7 +29,7 @@ export default function SignInPage() {
 
       router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in');
+      setError(err instanceof Error ? err.message : 'Failed to sign up');
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ export default function SignInPage() {
     <div className="min-h-screen flex items-center justify-center bg-ui-surface p-4">
       <div className="w-full max-w-md">
         <div className="bg-ui-background rounded-lg shadow-lg p-8">
-          <h1 className="text-2xl font-bold text-center mb-8">Sign in to Task Board</h1>
+          <h1 className="text-2xl font-bold text-center mb-8">Create your account</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
@@ -77,14 +77,14 @@ export default function SignInPage() {
             </div>
 
             <Button type="submit" loading={loading} className="w-full">
-              Sign In
+              Sign Up
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-text-secondary">
-            Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-brand-primary hover:underline">
-              Sign up
+            Already have an account?{' '}
+            <Link href="/auth/signin" className="text-brand-primary hover:underline">
+              Sign in
             </Link>
           </p>
         </div>

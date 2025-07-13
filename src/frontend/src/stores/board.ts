@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import type { BoardWithLists, ListWithCards, CardWithDetails, WebSocketMessage } from '@task-board/shared';
+import type { BoardWithLists, ListWithCards, CardWithDetails, WebSocketMessage } from '@shared/types/api';
 
 interface BoardState {
   board: BoardWithLists | null;

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import type { SupabaseClient } from '@supabase/supabase-js';

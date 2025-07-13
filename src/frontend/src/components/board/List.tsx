@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { Droppable } from '@hello-pangea/dnd';
-import type { ListWithCards } from '@task-board/shared';
+import type { ListWithCards } from '@shared/types/api';
 import { Card } from './Card';
 import { AddCardButton } from './AddCardButton';
 import { EditableText } from '../base/EditableText';

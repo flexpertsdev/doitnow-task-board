@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import type { BoardWithLists } from '@task-board/shared';
+import type { BoardWithLists } from '@shared/types/api';
 import { List } from './List';
 import { AddListButton } from './AddListButton';
 import { useBoardStore } from '@/stores/board';

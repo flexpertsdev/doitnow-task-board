@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NEXT_PUBLIC_SUPABASE_URL = "https://rzlanxrbxegsrasjspmw.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6bGFueHJieGVnc3Jhc2pzcG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjAzNTE5NjgsImV4cCI6MjAzNTkyNzk2OH0.VoTgS1h6YpKdHrMvXs1FeN-PQr8slr1cE0rn8F98QHs"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200

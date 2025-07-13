@@ -1,4 +1,4 @@
-import { Board, Card, List, User, Activity, Comment, Label, Attachment } from './entities';
+import { Board, Card, List, User, Label } from './entities';
 
 export interface ApiResponse<T> {
   data: T;

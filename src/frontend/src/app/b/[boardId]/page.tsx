@@ -7,14 +7,11 @@ import { useSession } from '@supabase/auth-helpers-react';
 import { useBoardStore } from '@/stores/board';
 import { BoardHeader } from '@/components/board/BoardHeader';
 import { BoardCanvas } from '@/components/board/BoardCanvas';
-import { useSupabase } from '@/app/providers';
-
 export default function BoardPage() {
   const params = useParams();
   const router = useRouter();
   const session = useSession();
-  const supabase = useSupabase();
-  const boardId = params.boardId as string;
+  const boardId = params?.boardId as string;
 
   const {
     board,

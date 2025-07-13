@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
-import type { CardWithDetails } from '@task-board/shared';
+import type { CardWithDetails } from '@shared/types/api';
 import { cn } from '@/utils/cn';
 
 interface CardProps {
