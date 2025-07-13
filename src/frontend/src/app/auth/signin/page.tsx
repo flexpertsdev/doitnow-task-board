@@ -27,7 +27,7 @@ export default function SignInPage() {
 
       if (error) throw error;
 
-      router.push('/');
+      router.push('/boards');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign in');
     } finally {

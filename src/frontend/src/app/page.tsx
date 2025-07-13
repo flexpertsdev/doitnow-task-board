@@ -1,6 +1,20 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useSession } from '@supabase/auth-helpers-react';
 
 export default function HomePage() {
+  const router = useRouter();
+  const session = useSession();
+
+  useEffect(() => {
+    if (session) {
+      router.push('/boards');
+    }
+  }, [session, router]);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
       <h1 className="text-xxl font-bold mb-4">Welcome to Task Board</h1>
